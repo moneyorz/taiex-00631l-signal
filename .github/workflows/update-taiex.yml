@@ -1,0 +1,33 @@
+name: Update TAIEX historical data
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # Taiwan time is UTC+8. Run every 30 minutes from 16:00 to 21:00
+    # on weekdays to confirm the latest historical close is available.
+    - cron: "0,30 8-12 * * 1-5"
+    - cron: "0 13 * * 1-5"
+
+permissions:
+  contents: write
+
+jobs:
+  update-taiex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update historical data
+        run: python scripts/update_taiex.py
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update TAIEX historical data"
+          file_pattern: "data/taiex.csv data/taiex_metadata.json"
