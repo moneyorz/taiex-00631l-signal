@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>00631L 波段策略訊號檢查器</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fa;
+        --panel: #ffffff;
+        --ink: #1f2937;
+        --muted: #64748b;
+        --line: #d8dee8;
+        --accent: #0f766e;
+        --accent-dark: #115e59;
+        --ok: #047857;
+        --danger: #b91c1c;
+        --warn-bg: #fff7ed;
+        --warn-line: #fed7aa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Microsoft JhengHei",
+          "Noto Sans TC",
+          system-ui,
+          sans-serif;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 42px;
+      }
+
+      header {
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+
+      section,
+      .result {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: 18px;
+      }
+
+      label {
+        display: block;
+        margin: 14px 0 6px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      select,
+      input {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        padding: 10px 12px;
+      }
+
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        margin-top: 14px;
+        padding: 10px 12px;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      .strategy-note,
+      .note {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .strategy-note {
+        margin: 10px 0 0;
+      }
+
+      .note {
+        margin: 12px 0 0;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .metric {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fbfcfd;
+        padding: 12px;
+      }
+
+      .metric .label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .metric .value {
+        margin-top: 4px;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .signal {
+        border: 1px solid #b7ddd6;
+        border-radius: 8px;
+        background: #eef6f5;
+        margin-bottom: 16px;
+        padding: 18px;
+      }
+
+      .signal.warn {
+        background: var(--warn-bg);
+        border-color: var(--warn-line);
+      }
+
+      .signal.danger {
+        background: #fef2f2;
+        border-color: #fecaca;
+      }
+
+      .signal h2 {
+        margin-bottom: 6px;
+        font-size: 22px;
+      }
+
+      .signal p {
+        margin: 0;
+        color: #334155;
+      }
+
+      .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .action-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        padding: 14px;
+      }
+
+      .action-card h3 {
+        margin: 0 0 6px;
+        font-size: 16px;
+      }
+
+      .action-card p {
+        margin: 0;
+      }
+
+      .action-card.ok {
+        border-color: #86efac;
+        background: #f0fdf4;
+      }
+
+      .action-card.danger {
+        border-color: #fecaca;
+        background: #fef2f2;
+      }
+
+      .action-card.neutral {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+        text-align: right;
+      }
+
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+
+      th {
+        background: #eef2f7;
+        color: #334155;
+        font-size: 13px;
+      }
+
+      @media (max-width: 860px) {
+        .layout,
+        .meta,
+        .actions-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>00631L 波段策略訊號檢查器</h1>
+        <p class="subtitle">用加權指數判斷進出場，實際交易標的是 00631L。盤中輸入值只作為今日收盤前的試算。</p>
+      </header>
+
+      <div class="layout">
+        <section>
+          <h2>設定</h2>
+
+          <label for="strategy">策略</label>
+          <select id="strategy">
+            <option value="scheme2" selected>方案2：站上10MA且今日轉強</option>
+          </select>
+          <p class="strategy-note">
+            買進：連2日站上5MA，且今日站上20MA、10MA，且今日大盤收盤高於昨日。
+            賣出：連2日跌破10MA。
+          </p>
+
+          <label for="currentIndex">今日大盤點位</label>
+          <input id="currentIndex" inputmode="decimal" placeholder="嘗試抓取即時大盤中，失敗時可手動輸入" />
+
+          <button id="liveBtn">立即更新即時大盤</button>
+          <button id="reloadBtn">重新載入歷史資料</button>
+
+          <p class="note">一進入頁面會先嘗試抓取證交所即時大盤；若抓不到，會顯示抓取失敗並保留手動輸入。</p>
+        </section>
+
+        <div>
+          <div class="meta">
+            <div class="metric">
+              <div class="label">歷史資料最新日期</div>
+              <div class="value" id="latestDate">載入中</div>
+            </div>
+            <div class="metric">
+              <div class="label">資料筆數</div>
+              <div class="value" id="rowCount">-</div>
+            </div>
+            <div class="metric">
+              <div class="label">最新收盤</div>
+              <div class="value" id="lastClose">-</div>
+            </div>
+          </div>
+
+          <div class="result">
+            <div id="signalBox" class="signal warn">
+              <h2>正在載入資料</h2>
+              <p>讀取歷史資料後會嘗試抓取即時大盤，並顯示空手與已持有時的處置方式。</p>
+            </div>
+
+            <h2>試算明細</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>項目</th>
+                  <th>昨日/最新歷史日</th>
+                  <th>今日試算</th>
+                </tr>
+              </thead>
+              <tbody id="detailRows">
+                <tr>
+                  <td>大盤收盤</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="note">連2日的判斷包含「昨日/最新歷史日」與「今日試算日」。</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const state = {
+        rows: [],
+        metadata: null,
+        currentSourceDate: null,
+      };
+
+      const $ = (id) => document.getElementById(id);
+
+      function parseCsv(text) {
+        const lines = text.trim().split(/\r?\n/);
+        const headers = lines.shift().split(",");
+        return lines.map((line) => {
+          const values = line.split(",");
+          const row = {};
+          headers.forEach((header, index) => {
+            row[header] = values[index];
+          });
+          row.close = Number(row.close);
+          return row;
+        });
+      }
+
+      function average(values) {
+        return values.reduce((sum, value) => sum + value, 0) / values.length;
+      }
+
+      function formatNumber(value, digits = 2) {
+        if (!Number.isFinite(value)) return "-";
+        return value.toLocaleString("zh-TW", {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        });
+      }
+
+      function normalizeTwseDate(value) {
+        const text = String(value || "").replace(/\D/g, "");
+        if (text.length !== 8) return null;
+        return `${text.slice(0, 4)}-${text.slice(4, 6)}-${text.slice(6, 8)}`;
+      }
+
+      function previousMa(rows, period) {
+        const history = rows.slice(-period).map((row) => row.close);
+        return history.length === period ? average(history) : NaN;
+      }
+
+      function projectedMa(rows, period, currentValue) {
+        const history = rows.slice(-(period - 1)).map((row) => row.close);
+        return history.length === period - 1 ? average([...history, currentValue]) : NaN;
+      }
+
+      async function loadHistory() {
+        const bust = Date.now();
+        const [csvResponse, metaResponse] = await Promise.all([
+          fetch(`data/taiex.csv?v=${bust}`),
+          fetch(`data/taiex_metadata.json?v=${bust}`).catch(() => null),
+        ]);
+        if (!csvResponse.ok) throw new Error("無法讀取 data/taiex.csv");
+
+        state.rows = parseCsv(await csvResponse.text()).filter((row) => Number.isFinite(row.close));
+        if (metaResponse && metaResponse.ok) {
+          state.metadata = await metaResponse.json();
+        }
+
+        renderMetadata();
+      }
+
+      function renderMetadata() {
+        const latest = state.rows[state.rows.length - 1];
+        $("latestDate").textContent = state.metadata?.latest_date || latest?.date || "-";
+        $("rowCount").textContent = state.rows.length.toLocaleString("zh-TW");
+        $("lastClose").textContent = latest ? formatNumber(latest.close, 2) : "-";
+      }
+
+      function getCalculationRows(currentValue) {
+        const latest = state.rows[state.rows.length - 1];
+        const isLatestClose =
+          state.currentSourceDate === latest.date ||
+          (!state.currentSourceDate && Math.abs(currentValue - latest.close) < 0.01);
+        return isLatestClose ? state.rows.slice(0, -1) : state.rows;
+      }
+
+      function calculateSignal(currentValue) {
+        const rowsForPreviousDay = getCalculationRows(currentValue);
+        const prev = rowsForPreviousDay[rowsForPreviousDay.length - 1];
+        const prevMa5 = previousMa(rowsForPreviousDay, 5);
+        const prevMa10 = previousMa(rowsForPreviousDay, 10);
+        const prevMa20 = previousMa(rowsForPreviousDay, 20);
+        const todayMa5 = projectedMa(rowsForPreviousDay, 5, currentValue);
+        const todayMa10 = projectedMa(rowsForPreviousDay, 10, currentValue);
+        const todayMa20 = projectedMa(rowsForPreviousDay, 20, currentValue);
+
+        const buySignal =
+          prev.close > prevMa5 &&
+          currentValue > todayMa5 &&
+          currentValue > todayMa20 &&
+          currentValue > todayMa10 &&
+          currentValue > prev.close;
+
+        const sellSignal = prev.close < prevMa10 && currentValue < todayMa10;
+
+        return {
+          prev,
+          currentValue,
+          prevMa5,
+          prevMa10,
+          prevMa20,
+          todayMa5,
+          todayMa10,
+          todayMa20,
+          buySignal,
+          sellSignal,
+        };
+      }
+
+      function renderSignal() {
+        if (state.rows.length < 20) return;
+
+        const currentValue = Number($("currentIndex").value.replace(/,/g, ""));
+        if (!Number.isFinite(currentValue) || currentValue <= 0) {
+          $("signalBox").className = "signal warn";
+          $("signalBox").innerHTML = "<h2>請輸入今日大盤點位</h2><p>輸入目前或預估收盤點位後，會立即試算方案2訊號。</p>";
+          renderDetails(null);
+          return;
+        }
+
+        const data = calculateSignal(currentValue);
+        const buyTitle = data.buySignal ? "空手：可進場" : "空手：暫不進場";
+        const buyMessage = data.buySignal
+          ? "方案2買進條件成立：連2日站上5MA，且今日站上20MA、10MA，並高於昨日收盤。"
+          : "方案2買進條件尚未全部成立。";
+        const sellTitle = data.sellSignal ? "已持有：可賣出" : "已持有：續抱";
+        const sellMessage = data.sellSignal
+          ? "方案2賣出條件成立：連2日跌破10MA。"
+          : "方案2尚未連2日跌破10MA。";
+
+        $("signalBox").className = "signal";
+        $("signalBox").innerHTML = `
+          <h2>今日方案2試算</h2>
+          <p>以今日大盤點位 ${formatNumber(currentValue)} 試算。</p>
+          <div class="actions-grid">
+            <div class="action-card ${data.buySignal ? "ok" : "neutral"}">
+              <h3>${buyTitle}</h3>
+              <p>${buyMessage}</p>
+            </div>
+            <div class="action-card ${data.sellSignal ? "danger" : "neutral"}">
+              <h3>${sellTitle}</h3>
+              <p>${sellMessage}</p>
+            </div>
+          </div>
+        `;
+        renderDetails(data);
+      }
+
+      function renderDetails(data) {
+        if (!data) {
+          $("detailRows").innerHTML = `
+            <tr><td>大盤收盤</td><td>-</td><td>-</td></tr>
+            <tr><td>5MA</td><td>-</td><td>-</td></tr>
+            <tr><td>10MA</td><td>-</td><td>-</td></tr>
+            <tr><td>20MA</td><td>-</td><td>-</td></tr>
+          `;
+          return;
+        }
+
+        $("detailRows").innerHTML = `
+          <tr><td>大盤收盤</td><td>${formatNumber(data.prev.close)}</td><td>${formatNumber(data.currentValue)}</td></tr>
+          <tr><td>5MA</td><td>${formatNumber(data.prevMa5)}</td><td>${formatNumber(data.todayMa5)}</td></tr>
+          <tr><td>10MA</td><td>${formatNumber(data.prevMa10)}</td><td>${formatNumber(data.todayMa10)}</td></tr>
+          <tr><td>20MA</td><td>${formatNumber(data.prevMa20)}</td><td>${formatNumber(data.todayMa20)}</td></tr>
+        `;
+      }
+
+      async function fetchLiveTaiex() {
+        $("signalBox").className = "signal warn";
+        $("signalBox").innerHTML = "<h2>正在抓取即時大盤</h2><p>資料來源為證交所即時資訊。若目前無法取得，可直接手動輸入今日大盤點位。</p>";
+
+        let value;
+        try {
+          const response = await fetch(`/api/live-taiex?v=${Date.now()}`);
+          if (!response.ok) throw new Error("本機即時資料代理無法使用");
+          const payload = await response.json();
+          state.currentSourceDate = normalizeTwseDate(payload.date);
+          value = Number(payload.value);
+        } catch {
+          const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_t00.tw&json=1&delay=0&_=${Date.now()}`;
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("證交所即時資料請求失敗");
+          const payload = await response.json();
+          const item = payload.msgArray?.[0];
+          state.currentSourceDate = normalizeTwseDate(item?.d);
+          value = Number(String(item?.z || item?.y || "").replace(/,/g, ""));
+        }
+
+        if (!Number.isFinite(value) || value <= 0) {
+          throw new Error("證交所即時資料格式無法辨識");
+        }
+
+        $("currentIndex").value = value.toFixed(2);
+        renderSignal();
+      }
+
+      function renderLiveFetchFailure(error) {
+        state.currentSourceDate = null;
+        $("signalBox").className = "signal warn";
+        $("signalBox").innerHTML = `<h2>即時大盤抓取失敗</h2><p>${error.message}。請手動輸入今日大盤點位，輸入後會立即試算。</p>`;
+        renderDetails(null);
+      }
+
+      $("reloadBtn").addEventListener("click", () => {
+        loadHistory()
+          .then(() => fetchLiveTaiex().catch(renderLiveFetchFailure))
+          .catch((error) => {
+            $("signalBox").className = "signal danger";
+            $("signalBox").innerHTML = `<h2>歷史資料載入失敗</h2><p>${error.message}</p>`;
+          });
+      });
+      $("liveBtn").addEventListener("click", () => {
+        fetchLiveTaiex().catch(renderLiveFetchFailure);
+      });
+      $("strategy").addEventListener("change", renderSignal);
+      $("currentIndex").addEventListener("input", () => {
+        state.currentSourceDate = null;
+        renderSignal();
+      });
+
+      loadHistory()
+        .then(() => fetchLiveTaiex().catch(renderLiveFetchFailure))
+        .catch((error) => {
+          $("signalBox").className = "signal danger";
+          $("signalBox").innerHTML = `<h2>歷史資料載入失敗</h2><p>${error.message}</p>`;
+        });
+    </script>
+  </body>
+</html>
