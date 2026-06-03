@@ -389,7 +389,11 @@
 
         state.rows = parseCsv(await csvResponse.text()).filter((row) => Number.isFinite(row.close));
         if (metaResponse && metaResponse.ok) {
-          state.metadata = await metaResponse.json();
+          try {
+            state.metadata = await metaResponse.json();
+          } catch {
+            state.metadata = null;
+          }
         }
 
         renderMetadata();
@@ -397,7 +401,7 @@
 
       function renderMetadata() {
         const latest = state.rows[state.rows.length - 1];
-        $("latestDate").textContent = state.metadata?.latest_date || latest?.date || "-";
+        $("latestDate").textContent = latest?.date || state.metadata?.latest_date || "-";
         $("rowCount").textContent = state.rows.length.toLocaleString("zh-TW");
         $("lastClose").textContent = latest ? formatNumber(latest.close, 2) : "-";
       }
