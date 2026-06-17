@@ -4,13 +4,13 @@
   "update_mode": "incremental",
   "fetched_start_date": "2026-06-06",
   "existing_rows": 7095,
-  "fetched_rows": 6,
-  "added_rows": 0,
+  "fetched_rows": 8,
+  "added_rows": 1,
   "revised_rows": 1,
   "changed": true,
-  "rows": 7095,
+  "rows": 7096,
   "first_date": "1997-07-02",
-  "latest_date": "2026-06-16",
-  "updated_at_utc": "2026-06-16T18:07:29+00:00",
+  "latest_date": "2026-06-17",
+  "updated_at_utc": "2026-06-17T12:21:25+00:00",
   "note": "Historical data only. Intraday/live index value is not included. Updates fetch only the recent missing/revisable range and merge by date."
 }
