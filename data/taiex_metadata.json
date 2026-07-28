@@ -5,12 +5,12 @@
   "fetched_start_date": "2026-07-17",
   "existing_rows": 7122,
   "fetched_rows": 7,
-  "added_rows": 0,
+  "added_rows": 1,
   "revised_rows": 1,
   "changed": true,
-  "rows": 7122,
+  "rows": 7123,
   "first_date": "1997-07-02",
-  "latest_date": "2026-07-27",
-  "updated_at_utc": "2026-07-27T14:47:55+00:00",
+  "latest_date": "2026-07-28",
+  "updated_at_utc": "2026-07-28T10:40:16+00:00",
   "note": "Historical data only. Intraday/live index value is not included. Updates fetch only the recent missing/revisable range and merge by date."
 }
